@@ -1,6 +1,11 @@
+import wave
+
+filename = "audio.wav"
+
 # read audio from file
 def read_audio(filename):
-    pass
+    audio = wave.open(filename, 'rb')
+    return audio
 
 
 # fragment audio
@@ -11,3 +16,7 @@ def fragment_audio(audio):
 # Fast Fourier Transform for the fragmented audio
 def fft_fragmented_audio(fragmented_audio):
     pass
+
+
+read_audio(filename)
+
