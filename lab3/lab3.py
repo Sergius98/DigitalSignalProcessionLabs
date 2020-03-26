@@ -14,8 +14,21 @@ from pydub import AudioSegment,silence
 # AudioSegment.converter=os.path.abspath("ffmpeg/bin/ffmpeg.exe")
 myaudio = intro = AudioSegment.from_wav("audio3.wav")
 
-silence = silence.detect_silence(myaudio, min_silence_len=1000, silence_thresh=-16)
+pause = silence.detect_silence(myaudio, min_silence_len=50, silence_thresh=-32)
 
-silence = [((start/1000),(stop/1000)) for start,stop in silence]  # convert to sec
-print(silence)
+pause = [((start/1000),(stop/1000)) for start,stop in pause]  # convert to sec
+print(pause)
+
+audio_chunks = silence.split_on_silence(intro,
+    # must be silent for at least 50ms
+    min_silence_len=50,
+
+    # consider it silent if quieter than -32 or -30 dBFS
+    silence_thresh=-32
+)
+for i, chunk in enumerate(audio_chunks):
+
+    out_file = ".//splitAudio//chunk{0}.wav".format(i)
+    print ("exporting", out_file)
+    chunk.export(out_file, format="wav")
 
