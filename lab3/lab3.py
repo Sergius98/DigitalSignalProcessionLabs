@@ -7,28 +7,53 @@ import os
 os.environ['PATH'] = os.environ['PATH'] + ";" + os.path.abspath("ffmpeg/bin/")
 print(os.environ['PATH'])
 
-from pydub import AudioSegment,silence
+from pydub import AudioSegment, silence
 
 
-# os.path.abspath("ffmpeg/bin/ffmpeg.exe")
-# AudioSegment.converter=os.path.abspath("ffmpeg/bin/ffmpeg.exe")
-myaudio = intro = AudioSegment.from_wav("audio3.wav")
+filename = "audio3.wav"
+min_silence_len = 50
+silence_thresh = -32
 
-pause = silence.detect_silence(myaudio, min_silence_len=50, silence_thresh=-32)
 
-pause = [((start/1000),(stop/1000)) for start,stop in pause]  # convert to sec
-print(pause)
+def open_audio(file_name="audio3.wav"):
+    audio = AudioSegment.from_wav(file_name)
+    return audio
 
-audio_chunks = silence.split_on_silence(intro,
-    # must be silent for at least 50ms
-    min_silence_len=50,
 
-    # consider it silent if quieter than -32 or -30 dBFS
-    silence_thresh=-32
-)
-for i, chunk in enumerate(audio_chunks):
+def get_pauses(audio, min_silence_length=50, silence_threshold=-32):
+    pauses = silence.detect_silence(audio, min_silence_len=min_silence_length, silence_thresh=silence_threshold)
 
-    out_file = ".//splitAudio//chunk{0}.wav".format(i)
-    print ("exporting", out_file)
-    chunk.export(out_file, format="wav")
+    pauses = [((start / 1000), (stop / 1000)) for start, stop in pauses]  # convert to sec
+
+    return pauses
+
+
+def get_words(audio, min_silence_length=50, silence_threshold=-32):
+    audio_chunks = silence.split_on_silence(audio,
+                                            # must be silent for at least 50ms
+                                            min_silence_len=min_silence_length,
+
+                                            # consider it silent if quieter than -32 or -30 dBFS
+                                            silence_thresh=silence_threshold
+                                            )
+    return audio_chunks
+
+
+def output_words(audio_words):
+    for i, chunk in enumerate(audio_words):
+        out_file = ".//splitAudio//word{0}.wav".format(i)
+        print("exporting", out_file)
+        chunk.export(out_file, format="wav")
+
+
+def show(file_name, min_silence_length, silence_threshold):
+    audio = open_audio()
+    pauses = get_pauses(audio)
+    words = get_words(audio)
+    print(pauses)
+    output_words(words)
+
+
+show(filename, min_silence_len, silence_thresh)
+
 
