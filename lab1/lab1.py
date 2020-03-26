@@ -41,22 +41,34 @@ def fft_fragmented_audio(fragmented_audio):
     return fft(fragmented_audio)
 
 
-def show(audio_filename="audio.wav"):
-    audio_from_file = read_audio(audio_filename)
+def show(filename="audio.wav"):
+    audio_from_file = read_audio(filename)
     audio_as_array = fragment_audio(audio_from_file)
-    audio_as_array = audio_as_array[9:]
+    trimmed_part = len(audio_as_array)//20000  # to make plot prettier
+    if trimmed_part > 100:
+        trimmed_part = 100
+    elif trimmed_part < 9 and len(audio_as_array) > 100:
+        trimmed_part = 9
+    print(trimmed_part)
+    audio_as_array = audio_as_array[trimmed_part:]
     audio_length = len(audio_as_array)
-    # audio_as_array = audio_as_array[audio_length//20:audio_length//2]
-    # audio_as_array = audio_as_array[audio_length//20:audio_length//20 + 100]
     transformed_fragmented_audio = fft_fragmented_audio(audio_as_array)
-    plot2('audio file', abs(np.asarray(audio_as_array)), 'fragmented audio',
-          abs(transformed_fragmented_audio), 'FFT fragmented audio')
-    plot2('zoom in',
-          abs(np.asarray(audio_as_array[audio_length//10:audio_length - audio_length//10])),
+    plot2(filename, np.asarray(audio_as_array), 'fragmented audio',
+          transformed_fragmented_audio, 'FFT fragmented audio')
+    plot2(filename + ' : zoom in',
+          np.asarray(audio_as_array[audio_length//10:audio_length - audio_length//10]),
           'fragmented audio',
-          abs(transformed_fragmented_audio[audio_length//10:audio_length - audio_length//10]),
+          transformed_fragmented_audio[audio_length//10:audio_length - audio_length//10],
           'FFT fragmented audio')
+    # plot2(audio_filename, abs(np.asarray(audio_as_array)), 'fragmented audio',
+    #       abs(transformed_fragmented_audio), 'FFT fragmented audio')
+    # plot2(audio_filename + ' : zoom in',
+    #       abs(np.asarray(audio_as_array[audio_length // 10:audio_length - audio_length // 10])),
+    #       'fragmented audio',
+    #       abs(transformed_fragmented_audio[audio_length // 10:audio_length - audio_length // 10]),
+    #       'FFT fragmented audio')
 
 
+# show(filename="../lab2/audio2.wav")
 show()
 
