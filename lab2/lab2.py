@@ -1,5 +1,5 @@
 import librosa
 
-
 filename = "audio2.wav"
-y, sr = librosa.load(filename)
+input, sample_rate = librosa.load(filename)
+mfcc_sequence = librosa.feature.mfcc(y=input, sr=sample_rate)
