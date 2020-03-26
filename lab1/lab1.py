@@ -12,7 +12,10 @@ def read_audio(filename):
 
 # fragment audio
 def fragment_audio(audio):
-    fragmented_audio = audio.T[0]  # this is a two channel soundtrack, I get the first track
+    if type(audio.T[0]) == np.ndarray:
+        fragmented_audio = audio.T[0]  # this is a two or more channel soundtrack, I get the first track
+    else:
+        fragmented_audio = audio.T
     return fragmented_audio
 
 
