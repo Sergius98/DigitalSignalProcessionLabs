@@ -8,72 +8,112 @@ import matplotlib
 from pprint import pprint
 from graphviz import render
 
-
 # download https://graphviz.gitlab.io/_pages/Download/Download_windows.html
 os.environ["PATH"] += os.pathsep + os.path.abspath("Graphviz2.38/bin/")
 
 
 # create state space and initial state probabilities
 
+def init_state_probabilities(states, pi):
+    state_space = pd.Series(pi, index=states, name='states')
+    return state_space
+
+
 states = ['sleeping', 'eating', 'playing']
 pi = [0.35, 0.35, 0.3]
-state_space = pd.Series(pi, index=states, name='states')
+state_space = init_state_probabilities(states, pi)
 print(state_space)
 print(state_space.sum())
+
 
 # create transition matrix
 # equals transition probability matrix of changing states given a state
 # matrix is size (M x M) where M is number of states
 
-q_df = pd.DataFrame(columns=states, index=states)
-q_df.loc[states[0]] = [0.4, 0.2, 0.4]
-q_df.loc[states[1]] = [0.45, 0.45, 0.1]
-q_df.loc[states[2]] = [0.45, 0.25, .3]
 
-print(q_df)
+def create_transition_matrix(states, transitions):
+    length = len(states)
+    if length != len(transitions):
+        raise Exception("marixs and states length aren't equal")
+    q_df = pd.DataFrame(columns=states, index=states)
+    for i in range(0, len(states)):
+        if length != len(transitions[i]):
+            raise Exception("marixs and states length aren't equal at transitions[" + str(i) + "]")
+        q_df.loc[states[i]] = transitions[i]
+    return q_df
 
-q = q_df.values
-print('\n', q, q.shape, '\n')
-print(q_df.sum(axis=1))
+
+transitions = [[0.4, 0.2, 0.4],
+               [0.45, 0.45, 0.1],
+               [0.45, 0.25, 0.3]]
+
+q_df = create_transition_matrix(states, transitions)
+
+
+def print_transition_matrix():
+    print(q_df)
+
+    q = q_df.values
+    print('\n', q, q.shape, '\n')
+    print(q_df.sum(axis=1))
+
+
+print_transition_matrix()
+
 
 # create a function that maps transition probability dataframe
 # to markov edges and weights
 
-def _get_markov_edges(Q):
+
+def get_markov_edges(Q):
     edges = {}
     for col in Q.columns:
         for idx in Q.index:
-            edges[(idx,col)] = Q.loc[idx,col]
+            edges[(idx, col)] = Q.loc[idx, col]
     return edges
 
-edges_wts = _get_markov_edges(q_df)
+
+edges_wts = get_markov_edges(q_df)
 pprint(edges_wts)
+
 
 ##############
 
-# create graph object
-G = nx.MultiDiGraph()
 
-# nodes correspond to states
-G.add_nodes_from(states)
+def create_graph_object(states, edges_wts):
+    # create graph object
+    G = nx.MultiDiGraph()
+
+    # nodes correspond to states
+    G.add_nodes_from(states)
+
+    # edges represent transition probabilities
+    for k, v in edges_wts.items():
+        tmp_origin, tmp_destination = k[0], k[1]
+        G.add_edge(tmp_origin, tmp_destination, weight=v, label=v)
+    return G
+
+
+G = create_graph_object(states, edges_wts)
 print(f'Nodes:\n{G.nodes()}\n')
-
-# edges represent transition probabilities
-for k, v in edges_wts.items():
-    tmp_origin, tmp_destination = k[0], k[1]
-    G.add_edge(tmp_origin, tmp_destination, weight=v, label=v)
 print(f'Edges:')
 pprint(G.edges(data=True))
 
-pos = nx.drawing.nx_pydot.graphviz_layout(G, prog='dot')
-nx.draw_networkx(G, pos)
 
-# create edge labels for jupyter plot but is not necessary
-edge_labels = {(n1,n2):d['label'] for n1,n2,d in G.edges(data=True)}
-nx.draw_networkx_edge_labels(G , pos, edge_labels=edge_labels)
-nx.drawing.nx_pydot.write_dot(G, 'pet_dog_markov.dot')
-render('dot', 'png', 'pet_dog_markov.dot')
+def draw_on_dot(G, filename):
+    pos = nx.drawing.nx_pydot.graphviz_layout(G, prog='dot')
+    nx.draw_networkx(G, pos)
 
+    # create edge labels for jupyter plot but is not necessary
+    edge_labels = {(n1, n2): d['label'] for n1, n2, d in G.edges(data=True)}
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
+    nx.drawing.nx_pydot.write_dot(G, filename)
+    render('dot', 'png', filename)
+
+
+draw_on_dot(G, "pet_dog_markov.dot")
+
+exit()
 ################################################
 
 # create state space and initial state probabilities
@@ -124,10 +164,10 @@ print(b_df.sum(axis=1))
 
 # create graph edges and weights
 
-hide_edges_wts = _get_markov_edges(a_df)
+hide_edges_wts = get_markov_edges(a_df)
 pprint(hide_edges_wts)
 
-emit_edges_wts = _get_markov_edges(b_df)
+emit_edges_wts = get_markov_edges(b_df)
 pprint(emit_edges_wts)
 
 ##############################################
@@ -166,14 +206,15 @@ render('dot', 'png', 'pet_dog_hidden_markov.dot')
 # observation sequence of dog's behaviors
 # observations are encoded numerically
 
-obs_map = {'sleeping':0, 'eating':1, 'playing':2}
-obs = np.array([1,1,2,1,0,1,2,1,0,2,2,0,1,0,1])
+obs_map = {'sleeping': 0, 'eating': 1, 'playing': 2}
+obs = np.array([1, 1, 2, 1, 0, 1, 2, 1, 0, 2, 2, 0, 1, 0, 1])
 
-inv_obs_map = dict((v,k) for k, v in obs_map.items())
+inv_obs_map = dict((v, k) for k, v in obs_map.items())
 obs_seq = [inv_obs_map[v] for v in list(obs)]
 
-print( pd.DataFrame(np.column_stack([obs, obs_seq]),
-                columns=['Obs_code', 'Obs_seq']) )
+print(pd.DataFrame(np.column_stack([obs, obs_seq]),
+                   columns=['Obs_code', 'Obs_seq']))
+
 
 ##############################################
 
@@ -209,7 +250,7 @@ def viterbi(pi, a, b, obs):
     print('Start Backtrace\n')
     path[T - 1] = np.argmax(delta[:, T - 1])
     # p('init path\n    t={} path[{}-1]={}\n'.format(T-1, T, path[T-1]))
-    for t in range(T-2, -1, -1):
+    for t in range(T - 2, -1, -1):
         # path[t] = phi[path[t + 1], [t + 1]]
         path[t] = phi[int(path[t + 1]), [t + 1]]
         # p(' '*4 + 't={t}, path[{t}+1]={path}, [{t}+1]={i}'.format(t=t, path=path[t+1], i=[t+1]))
@@ -225,11 +266,11 @@ print('phi:\n', phi)
 
 #############################################################
 
-state_map = {0:'healthy', 1:'sick'}
+state_map = {0: 'healthy', 1: 'sick'}
 state_path = [state_map[v] for v in path]
 
 print(pd.DataFrame()
- .assign(Observation=obs_seq)
- .assign(Best_Path=state_path))
+      .assign(Observation=obs_seq)
+      .assign(Best_Path=state_path))
 
 ####################################################
