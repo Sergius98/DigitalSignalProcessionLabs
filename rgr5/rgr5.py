@@ -81,13 +81,12 @@ def create_graph_object(states, edges_wts, emit_edges_wts):
 
 def draw_on_dot(G, filename, prog):
     pos = nx.drawing.nx_pydot.graphviz_layout(G, prog=prog)
-    #nx.draw_networkx(G, pos)
+    nx.draw_networkx(G, pos)
 
-    nx.draw(G, pos, with_labels=True)
-    edge_labels = {(n1, n2): d['label'] for n1, n2, d in G.edges(data=True)}
-    print(G.nodes)
-    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
-    matplotlib.pyplot.savefig("pyplot."+filename+".png")
+    #nx.draw(G, pos, with_labels=True)
+    #edge_labels = {(n1, n2): d['label'] for n1, n2, d in G.edges(data=True)}
+    #nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
+    #matplotlib.pyplot.savefig("pyplot."+filename+".png")
     #matplotlib.pyplot.show()
 
     # create edge labels for jupyter plot but is not necessary
@@ -102,6 +101,72 @@ def make_observation(obs, obs_map):
     obs_seq = [inv_obs_map[v] for v in list(obs)]
 
     return obs_seq
+
+
+def viterbi(pi, a, b, obs):
+    nStates = np.shape(b)[0]
+    T = np.shape(obs)[0]
+
+    # init blank path
+    path = np.zeros(T)
+    # delta --> highest probability of any path that reaches state i
+    delta = np.zeros((nStates, T))
+    # phi --> argmax by time step for each state
+    phi = np.zeros((nStates, T))
+
+    # init delta and phi
+    delta[:, 0] = pi * b[:, obs[0]]
+    phi[:, 0] = 0
+
+    print('\nStart Walk Forward\n')
+    # the forward algorithm extension
+    for t in range(1, T):
+        for s in range(nStates):
+            delta[s, t] = np.max(delta[:, t - 1] * a[:, s]) * b[s, obs[t]]
+            phi[s, t] = np.argmax(delta[:, t - 1] * a[:, s])
+            print('s={s} and t={t}: phi[{s}, {t}] = {phi}'.format(s=s, t=t, phi=phi[s, t]))
+
+    # find optimal path
+    print('-' * 50)
+    print('Start Backtrace\n')
+    path[T - 1] = np.argmax(delta[:, T - 1])
+    # p('init path\n    t={} path[{}-1]={}\n'.format(T-1, T, path[T-1]))
+    for t in range(T - 2, -1, -1):
+        # path[t] = phi[path[t + 1], [t + 1]]
+        path[t] = phi[int(path[t + 1]), [t + 1]]
+        # p(' '*4 + 't={t}, path[{t}+1]={path}, [{t}+1]={i}'.format(t=t, path=path[t+1], i=[t+1]))
+        print('path[{}] = {}'.format(t, path[t]))
+
+    return path, delta, phi
+
+
+
+def show_markov():
+    ####
+    states = ['sleeping', 'eating', 'playing']
+    pi = [0.35, 0.35, 0.3]
+    state_space = init_state_probabilities(states, pi)
+    print(state_space)
+    print(state_space.sum())
+    ####
+    transitions = [[0.4, 0.2, 0.4],
+                   [0.45, 0.45, 0.1],
+                   [0.45, 0.25, 0.3]]
+
+    q_df = create_transition_matrix(states, transitions)
+    ####
+    print_transition_matrix(q_df)
+    ####
+    edges_wts = get_markov_edges(q_df)
+    pprint(edges_wts)
+    ####
+    G = create_graph_object(states, edges_wts, {})
+    print(f'Nodes:\n{G.nodes()}\n')
+    print(f'Edges:')
+    pprint(G.edges(data=True))
+    ####
+    draw_on_dot(G, "pet_dog_markov.dot", "dot")
+    ####
 
 
 def show_hidden():
@@ -153,108 +218,21 @@ def show_hidden():
     print(pd.DataFrame(np.column_stack([obs, obs_seq]),
                         columns=['Obs_code', 'Obs_seq']))
     ####
-
-###################
-show_hidden()
-exit()
-###################
-
-
-##########################################################
-
-
-
-
-##############################################
-
-# define Viterbi algorithm for shortest path
-# code adapted from Stephen Marsland's, Machine Learning An Algorthmic Perspective, Vol. 2
-# https://github.com/alexsosn/MarslandMLAlgo/blob/master/Ch16/HMM.py
-
-def viterbi(pi, a, b, obs):
-    nStates = np.shape(b)[0]
-    T = np.shape(obs)[0]
-
-    # init blank path
-    path = np.zeros(T)
-    # delta --> highest probability of any path that reaches state i
-    delta = np.zeros((nStates, T))
-    # phi --> argmax by time step for each state
-    phi = np.zeros((nStates, T))
-
-    # init delta and phi
-    delta[:, 0] = pi * b[:, obs[0]]
-    phi[:, 0] = 0
-
-    print('\nStart Walk Forward\n')
-    # the forward algorithm extension
-    for t in range(1, T):
-        for s in range(nStates):
-            delta[s, t] = np.max(delta[:, t - 1] * a[:, s]) * b[s, obs[t]]
-            phi[s, t] = np.argmax(delta[:, t - 1] * a[:, s])
-            print('s={s} and t={t}: phi[{s}, {t}] = {phi}'.format(s=s, t=t, phi=phi[s, t]))
-
-    # find optimal path
-    print('-' * 50)
-    print('Start Backtrace\n')
-    path[T - 1] = np.argmax(delta[:, T - 1])
-    # p('init path\n    t={} path[{}-1]={}\n'.format(T-1, T, path[T-1]))
-    for t in range(T - 2, -1, -1):
-        # path[t] = phi[path[t + 1], [t + 1]]
-        path[t] = phi[int(path[t + 1]), [t + 1]]
-        # p(' '*4 + 't={t}, path[{t}+1]={path}, [{t}+1]={i}'.format(t=t, path=path[t+1], i=[t+1]))
-        print('path[{}] = {}'.format(t, path[t]))
-
-    return path, delta, phi
-
-
-path, delta, phi = viterbi(pi, a, b, obs)
-print('\nsingle best state path: \n', path)
-print('delta:\n', delta)
-print('phi:\n', phi)
-
-#############################################################
-
-state_map = {0: 'healthy', 1: 'sick'}
-state_path = [state_map[v] for v in path]
-
-print(pd.DataFrame()
-      .assign(Observation=obs_seq)
-      .assign(Best_Path=state_path))
-
-####################################################
-
-
-def show_markov():
+    path, delta, phi = viterbi(pi, a, b, obs)
+    print('\nsingle best state path: \n', path)
+    print('delta:\n', delta)
+    print('phi:\n', phi)
     ####
-    states = ['sleeping', 'eating', 'playing']
-    pi = [0.35, 0.35, 0.3]
-    state_space = init_state_probabilities(states, pi)
-    print(state_space)
-    print(state_space.sum())
-    ####
-    transitions = [[0.4, 0.2, 0.4],
-                   [0.45, 0.45, 0.1],
-                   [0.45, 0.25, 0.3]]
+    state_map = {0: 'healthy', 1: 'sick'}
+    state_path = [state_map[v] for v in path]
 
-    q_df = create_transition_matrix(states, transitions)
-    ####
-    print_transition_matrix(q_df)
-    ####
-    edges_wts = get_markov_edges(q_df)
-    pprint(edges_wts)
-    ####
-    G = create_graph_object(states, edges_wts, {})
-    print(f'Nodes:\n{G.nodes()}\n')
-    print(f'Edges:')
-    pprint(G.edges(data=True))
-    ####
-    draw_on_dot(G, "pet_dog_markov.dot", "dot")
-    ####
+    print(pd.DataFrame()
+          .assign(Observation=obs_seq)
+          .assign(Best_Path=state_path))
 
 
 def show():
-    show_markov()
+    #show_markov()
     show_hidden()
 
 
