@@ -19,46 +19,29 @@ def init_state_probabilities(states, pi):
     return state_space
 
 
-states = ['sleeping', 'eating', 'playing']
-pi = [0.35, 0.35, 0.3]
-state_space = init_state_probabilities(states, pi)
-print(state_space)
-print(state_space.sum())
-
-
 # create transition matrix
 # equals transition probability matrix of changing states given a state
 # matrix is size (M x M) where M is number of states
 
 
-def create_transition_matrix(states, transitions):
-    length = len(states)
-    if length != len(transitions):
+def create_transition_matrix(hidden_states, observable_states, transitions):
+    length = len(observable_states)
+    if len(hidden_states) != len(transitions):
         raise Exception("marixs and states length aren't equal")
-    q_df = pd.DataFrame(columns=states, index=states)
-    for i in range(0, len(states)):
+    df = pd.DataFrame(columns=observable_states, index=hidden_states)
+    for i in range(0, len(hidden_states)):
         if length != len(transitions[i]):
             raise Exception("marixs and states length aren't equal at transitions[" + str(i) + "]")
-        q_df.loc[states[i]] = transitions[i]
-    return q_df
+        df.loc[hidden_states[i]] = transitions[i]
+    return df
 
 
-transitions = [[0.4, 0.2, 0.4],
-               [0.45, 0.45, 0.1],
-               [0.45, 0.25, 0.3]]
-
-q_df = create_transition_matrix(states, transitions)
-
-
-def print_transition_matrix():
+def print_transition_matrix(q_df):
     print(q_df)
 
     q = q_df.values
     print('\n', q, q.shape, '\n')
     print(q_df.sum(axis=1))
-
-
-print_transition_matrix()
 
 
 # create a function that maps transition probability dataframe
@@ -71,13 +54,6 @@ def get_markov_edges(Q):
         for idx in Q.index:
             edges[(idx, col)] = Q.loc[idx, col]
     return edges
-
-
-edges_wts = get_markov_edges(q_df)
-pprint(edges_wts)
-
-
-##############
 
 
 def create_graph_object(states, edges_wts):
@@ -94,12 +70,6 @@ def create_graph_object(states, edges_wts):
     return G
 
 
-G = create_graph_object(states, edges_wts)
-print(f'Nodes:\n{G.nodes()}\n')
-print(f'Edges:')
-pprint(G.edges(data=True))
-
-
 def draw_on_dot(G, filename):
     pos = nx.drawing.nx_pydot.graphviz_layout(G, prog='dot')
     nx.draw_networkx(G, pos)
@@ -111,64 +81,44 @@ def draw_on_dot(G, filename):
     render('dot', 'png', filename)
 
 
-draw_on_dot(G, "pet_dog_markov.dot")
+def show_hidden():
+    ####
+    states = ['sleeping', 'eating', 'playing']
+    hidden_states = ['healthy', 'sick']
+    pi = [0.5, 0.5]
+    state_space = init_state_probabilities(hidden_states, pi)
+    print(state_space)
+    print('\n', state_space.sum())
+    ####
+    transitions = [[0.7, 0.3],
+                   [0.4, 0.6]]
+    a_df = create_transition_matrix(hidden_states, hidden_states, transitions)
+    print(a_df)
+    a = a_df.values
+    print('\n', a, a.shape, '\n')
+    print(a_df.sum(axis=1))
+    ####
+    observable_states = states
+    transitions = [[0.2, 0.6, 0.2],
+                   [0.4, 0.1, 0.5]]
+    b_df = create_transition_matrix(hidden_states, observable_states, transitions)
+    print(b_df)
+    b = b_df.values
+    print('\n', b, b.shape, '\n')
+    print(b_df.sum(axis=1))
+    ####
+    hide_edges_wts = get_markov_edges(a_df)
+    print("hide_edges_wts: ")
+    pprint(hide_edges_wts)
+    emit_edges_wts = get_markov_edges(b_df)
+    print("emit_edges_wts: ")
+    pprint(emit_edges_wts)
 
+
+###################
+show_hidden()
 exit()
-################################################
-
-# create state space and initial state probabilities
-
-hidden_states = ['healthy', 'sick']
-pi = [0.5, 0.5]
-state_space = pd.Series(pi, index=hidden_states, name='states')
-print(state_space)
-print('\n', state_space.sum())
-
-######################################################
-
-# create hidden transition matrix
-# a or alpha
-#   = transition probability matrix of changing states given a state
-# matrix is size (M x M) where M is number of states
-
-a_df = pd.DataFrame(columns=hidden_states, index=hidden_states)
-a_df.loc[hidden_states[0]] = [0.7, 0.3]
-a_df.loc[hidden_states[1]] = [0.4, 0.6]
-
-print(a_df)
-
-a = a_df.values
-print('\n', a, a.shape, '\n')
-print(a_df.sum(axis=1))
-
-############################################################
-
-# create matrix of observation (emission) probabilities
-# b or beta = observation probabilities given state
-# matrix is size (M x O) where M is number of states
-# and O is number of different possible observations
-
-observable_states = states
-
-b_df = pd.DataFrame(columns=observable_states, index=hidden_states)
-b_df.loc[hidden_states[0]] = [0.2, 0.6, 0.2]
-b_df.loc[hidden_states[1]] = [0.4, 0.1, 0.5]
-
-print(b_df)
-
-b = b_df.values
-print('\n', b, b.shape, '\n')
-print(b_df.sum(axis=1))
-
-###############################################
-
-# create graph edges and weights
-
-hide_edges_wts = get_markov_edges(a_df)
-pprint(hide_edges_wts)
-
-emit_edges_wts = get_markov_edges(b_df)
-pprint(emit_edges_wts)
+###################
 
 ##############################################
 
@@ -274,3 +224,39 @@ print(pd.DataFrame()
       .assign(Best_Path=state_path))
 
 ####################################################
+
+
+def show_markov():
+    ####
+    states = ['sleeping', 'eating', 'playing']
+    pi = [0.35, 0.35, 0.3]
+    state_space = init_state_probabilities(states, pi)
+    print(state_space)
+    print(state_space.sum())
+    ####
+    transitions = [[0.4, 0.2, 0.4],
+                   [0.45, 0.45, 0.1],
+                   [0.45, 0.25, 0.3]]
+
+    q_df = create_transition_matrix(states, transitions)
+    ####
+    print_transition_matrix(q_df)
+    ####
+    edges_wts = get_markov_edges(q_df)
+    pprint(edges_wts)
+    ####
+    G = create_graph_object(states, edges_wts)
+    print(f'Nodes:\n{G.nodes()}\n')
+    print(f'Edges:')
+    pprint(G.edges(data=True))
+    ####
+    draw_on_dot(G, "pet_dog_markov.dot")
+    ####
+
+
+def show():
+    show_markov()
+    show_hidden()
+
+
+show()
