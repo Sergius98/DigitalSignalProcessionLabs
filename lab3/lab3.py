@@ -4,7 +4,7 @@ import os
 # download ffmpeg
 # set PATH=%PATH%;C:\Users\BIGse\git\DigitalSignalProcessionLabs\lab3\ffmpeg\bin\
 # ";C:\\Users\\BIGse\\git\\DigitalSignalProcessionLabs\\lab3\\ffmpeg\\bin\\"
-os.environ['PATH'] = os.environ['PATH'] + ";" + os.path.abspath("ffmpeg/bin/")
+os.environ['PATH'] += os.pathsep + os.path.abspath("ffmpeg/bin/")
 print(os.environ['PATH'])
 
 from pydub import AudioSegment, silence
