@@ -169,26 +169,19 @@ def show_markov():
     ####
 
 
-def show_hidden():
+def show_hidden(states, hidden_states, pi, hidden_transitions, transitions, obs_map, obs):
     ####
-    states = ['sleeping', 'eating', 'playing']
-    hidden_states = ['healthy', 'sick']
-    pi = [0.5, 0.5]
     state_space = init_state_probabilities(hidden_states, pi)
     print(state_space)
     print('\n', state_space.sum())
     ####
-    transitions = [[0.7, 0.3],
-                   [0.4, 0.6]]
-    a_df = create_transition_matrix(hidden_states, hidden_states, transitions)
+    a_df = create_transition_matrix(hidden_states, hidden_states, hidden_transitions)
     print(a_df)
     a = a_df.values
     print('\n', a, a.shape, '\n')
     print(a_df.sum(axis=1))
     ####
     observable_states = states
-    transitions = [[0.2, 0.6, 0.2],
-                   [0.4, 0.1, 0.5]]
     b_df = create_transition_matrix(hidden_states, observable_states, transitions)
     print(b_df)
     b = b_df.values
@@ -211,9 +204,6 @@ def show_hidden():
     pprint(G.edges(data=True))
     draw_on_dot(G, filename, prog)
     ####
-    obs_map = {'sleeping': 0, 'eating': 1, 'playing': 2}
-    obs = np.array([1, 1, 2, 1, 0, 1, 2, 1, 0, 2, 2, 0, 1, 0, 1])
-
     obs_seq = make_observation(obs, obs_map)
     print(pd.DataFrame(np.column_stack([obs, obs_seq]),
                         columns=['Obs_code', 'Obs_seq']))
@@ -232,8 +222,19 @@ def show_hidden():
 
 
 def show():
-    #show_markov()
-    show_hidden()
+    # show_markov()
+
+    states = ['sleeping', 'eating', 'playing']
+    hidden_states = ['healthy', 'sick']
+    #observable_transitions
+    hidden_transitions = [[0.7, 0.3],
+                          [0.4, 0.6]]
+    transitions = [[0.2, 0.6, 0.2],
+                   [0.4, 0.1, 0.5]]
+    hidden_pi = [0.5, 0.5]
+    obs_map = {'sleeping': 0, 'eating': 1, 'playing': 2}
+    obs = np.array([1, 1, 2, 1, 0, 1, 2, 1, 0, 2, 2, 0, 1, 0, 1])
+    show_hidden(states, hidden_states, hidden_pi, hidden_transitions, transitions, obs_map, obs)
 
 
 show()
