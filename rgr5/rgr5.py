@@ -140,20 +140,13 @@ def viterbi(pi, a, b, obs):
     return path, delta, phi
 
 
-'''
-def show_markov():
+def show_markov(states, pi, transitions, filename, prog):
     ####
-    states = ['sleeping', 'eating', 'playing']
-    pi = [0.35, 0.35, 0.3]
     state_space = init_state_probabilities(states, pi)
     print(state_space)
     print(state_space.sum())
     ####
-    transitions = [[0.4, 0.2, 0.4],
-                   [0.45, 0.45, 0.1],
-                   [0.45, 0.25, 0.3]]
-
-    q_df = create_transition_matrix(states, transitions)
+    q_df = create_transition_matrix(states, states, transitions)
     ####
     print_transition_matrix(q_df)
     ####
@@ -165,9 +158,8 @@ def show_markov():
     print(f'Edges:')
     pprint(G.edges(data=True))
     ####
-    draw_on_dot(G, "pet_dog_markov.dot", "dot")
+    draw_on_dot(G, filename, prog)
     ####
-'''
 
 def show_hidden(states, hidden_states, pi, hidden_transitions, transitions, obs_map, obs, state_map, filename, prog):
     ####
@@ -218,11 +210,21 @@ def show_hidden(states, hidden_states, pi, hidden_transitions, transitions, obs_
 
 
 def show():
-
-    filename = 'student_hidden_markov.dot'
-    # prog = 'dot'
-    prog = 'neato'
+    filename1 = 'student_markov.dot'
+    filename2 = 'student_hidden_markov.dot'
+    prog1 = 'dot'
+    prog2 = 'neato'
     states = ['sleeping', 'eating', 'playing', 'working out', 'studying']
+    observ_transition = [[0.2, 0.5, 0.1,  0.1, 0.1],
+                         [0.3, 0.1, 0.2,  0.2, 0.2],
+                         [0.4, 0.4, 0.05, 0.1, 0.05],
+                         [0.1, 0.1, 0.2,  0.2, 0.4],
+                         [0.2, 0.5, 0.1,  0.1, 0.1]]
+    observ_pi = [0.2, 0.2, 0.2, 0.2, 0.2]
+
+    show_markov(states, observ_pi, observ_transition, filename1, prog1)
+
+    # hidden
     hidden_states = ['healthy', 'sick', 'depressed']
     hidden_transitions = [[0.5, 0.2, 0.3],
                           [0.2, 0.5, 0.3],
@@ -235,7 +237,7 @@ def show():
     obs = np.array([3, 3, 2, 3, 0, 1, 2, 3, 2, 4, 4, 0, 1, 2, 1, 0, 1, 2, 1, 0, 1, 0, 1, 0, 1, 2, 3, 4, 3, 2, 1, 0])
     #obs = np.array([1, 2, 3, 3, 1, 4, 4, 4, 1, 0, 0, 1, 1, 1, 2, 2, 2, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 2, 2, 0, 1, 4, 1, 0, 1])
     state_map = {0: 'healthy', 1: 'sick', 2: 'depressed'}
-    show_hidden(states, hidden_states, hidden_pi, hidden_transitions, transitions, obs_map, obs, state_map, filename, prog)
+    show_hidden(states, hidden_states, hidden_pi, hidden_transitions, transitions, obs_map, obs, state_map, filename2, prog2)
 
 
 show()

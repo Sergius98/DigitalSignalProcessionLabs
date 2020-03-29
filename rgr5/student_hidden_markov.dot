@@ -1,0 +1,34 @@
+digraph  {
+healthy;
+sick;
+depressed;
+sleeping;
+eating;
+playing;
+"working out";
+studying;
+healthy -> healthy  [key=0, label="0.5", weight="0.5"];
+healthy -> sick  [key=0, label="0.2", weight="0.2"];
+healthy -> depressed  [key=0, label="0.3", weight="0.3"];
+healthy -> sleeping  [key=0, label="0.2", weight="0.2"];
+healthy -> eating  [key=0, label="0.2", weight="0.2"];
+healthy -> playing  [key=0, label="0.2", weight="0.2"];
+healthy -> "working out"  [key=0, label="0.2", weight="0.2"];
+healthy -> studying  [key=0, label="0.2", weight="0.2"];
+sick -> healthy  [key=0, label="0.2", weight="0.2"];
+sick -> sick  [key=0, label="0.5", weight="0.5"];
+sick -> depressed  [key=0, label="0.3", weight="0.3"];
+sick -> sleeping  [key=0, label="0.4", weight="0.4"];
+sick -> eating  [key=0, label="0.3", weight="0.3"];
+sick -> playing  [key=0, label="0.1", weight="0.1"];
+sick -> "working out"  [key=0, label="0.1", weight="0.1"];
+sick -> studying  [key=0, label="0.1", weight="0.1"];
+depressed -> healthy  [key=0, label="0.2", weight="0.2"];
+depressed -> sick  [key=0, label="0.3", weight="0.3"];
+depressed -> depressed  [key=0, label="0.5", weight="0.5"];
+depressed -> sleeping  [key=0, label="0.3", weight="0.3"];
+depressed -> eating  [key=0, label="0.3", weight="0.3"];
+depressed -> playing  [key=0, label="0.3", weight="0.3"];
+depressed -> "working out"  [key=0, label="0.05", weight="0.05"];
+depressed -> studying  [key=0, label="0.05", weight="0.05"];
+}
