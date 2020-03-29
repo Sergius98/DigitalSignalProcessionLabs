@@ -1,0 +1,32 @@
+digraph  {
+sleeping;
+eating;
+playing;
+"working out";
+studying;
+sleeping -> sleeping  [key=0, label="0.2", weight="0.2"];
+sleeping -> eating  [key=0, label="0.5", weight="0.5"];
+sleeping -> playing  [key=0, label="0.1", weight="0.1"];
+sleeping -> "working out"  [key=0, label="0.1", weight="0.1"];
+sleeping -> studying  [key=0, label="0.1", weight="0.1"];
+eating -> sleeping  [key=0, label="0.3", weight="0.3"];
+eating -> eating  [key=0, label="0.1", weight="0.1"];
+eating -> playing  [key=0, label="0.2", weight="0.2"];
+eating -> "working out"  [key=0, label="0.2", weight="0.2"];
+eating -> studying  [key=0, label="0.2", weight="0.2"];
+playing -> sleeping  [key=0, label="0.4", weight="0.4"];
+playing -> eating  [key=0, label="0.4", weight="0.4"];
+playing -> playing  [key=0, label="0.05", weight="0.05"];
+playing -> "working out"  [key=0, label="0.1", weight="0.1"];
+playing -> studying  [key=0, label="0.05", weight="0.05"];
+"working out" -> sleeping  [key=0, label="0.1", weight="0.1"];
+"working out" -> eating  [key=0, label="0.1", weight="0.1"];
+"working out" -> playing  [key=0, label="0.2", weight="0.2"];
+"working out" -> "working out"  [key=0, label="0.2", weight="0.2"];
+"working out" -> studying  [key=0, label="0.4", weight="0.4"];
+studying -> sleeping  [key=0, label="0.2", weight="0.2"];
+studying -> eating  [key=0, label="0.5", weight="0.5"];
+studying -> playing  [key=0, label="0.1", weight="0.1"];
+studying -> "working out"  [key=0, label="0.1", weight="0.1"];
+studying -> studying  [key=0, label="0.1", weight="0.1"];
+}
