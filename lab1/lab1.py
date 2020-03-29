@@ -74,7 +74,7 @@ def fragmented_fft_fragmented_audio(fragmented_audio, n):
     return sliced_fft
 
 
-def show_sliced(filename="audio.wav", n = 100):
+def show_sliced(filename="audio.wav", n=100):
     audio_from_file = read_audio(filename)
     audio_as_array = fragment_audio(audio_from_file)
     transformed_sliced_fragmented_audio = fragmented_fft_fragmented_audio(audio_as_array, n)

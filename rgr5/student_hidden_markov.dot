@@ -26,9 +26,9 @@ sick -> studying  [key=0, label="0.1", weight="0.1"];
 depressed -> healthy  [key=0, label="0.2", weight="0.2"];
 depressed -> sick  [key=0, label="0.3", weight="0.3"];
 depressed -> depressed  [key=0, label="0.5", weight="0.5"];
-depressed -> sleeping  [key=0, label="0.3", weight="0.3"];
-depressed -> eating  [key=0, label="0.3", weight="0.3"];
-depressed -> playing  [key=0, label="0.3", weight="0.3"];
+depressed -> sleeping  [key=0, label="0.5", weight="0.5"];
+depressed -> eating  [key=0, label="0.2", weight="0.2"];
+depressed -> playing  [key=0, label="0.2", weight="0.2"];
 depressed -> "working out"  [key=0, label="0.05", weight="0.05"];
 depressed -> studying  [key=0, label="0.05", weight="0.05"];
 }

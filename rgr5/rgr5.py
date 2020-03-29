@@ -231,10 +231,10 @@ def show():
                           [0.2, 0.3, 0.5]]
     transitions = [[0.2, 0.2, 0.2, 0.2, 0.2],
                    [0.4, 0.3, 0.1, 0.1, 0.1],
-                   [0.3, 0.3, 0.3, 0.05, 0.05]]
+                   [0.5, 0.2, 0.2, 0.05, 0.05]]
     hidden_pi = [0.4, 0.3, 0.3]
     obs_map = {'sleeping': 0, 'eating': 1, 'playing': 2, 'working out':3, 'studying':4}
-    obs = np.array([3, 3, 2, 3, 0, 1, 2, 3, 2, 4, 4, 0, 1, 2, 1, 0, 1, 2, 1, 0, 1, 0, 1, 0, 1, 2, 3, 4, 3, 2, 1, 0])
+    obs = np.array([3, 3, 2, 3, 0, 1, 2, 3, 2, 4, 4, 0, 1, 2, 1, 0, 1, 2, 1, 0, 1, 0, 1, 0, 1, 2, 3, 4, 3, 2, 1, 0, 0])
     #obs = np.array([1, 2, 3, 3, 1, 4, 4, 4, 1, 0, 0, 1, 1, 1, 2, 2, 2, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 2, 2, 0, 1, 4, 1, 0, 1])
     state_map = {0: 'healthy', 1: 'sick', 2: 'depressed'}
     show_hidden(states, hidden_states, hidden_pi, hidden_transitions, transitions, obs_map, obs, state_map, filename2, prog2)
