@@ -74,28 +74,19 @@ def fragmented_fft_fragmented_audio(fragmented_audio, n):
     return sliced_fft
 
 
-def show_sliced(filename="audio.wav"):
+def show_sliced(filename="audio.wav", n = 100):
     audio_from_file = read_audio(filename)
     audio_as_array = fragment_audio(audio_from_file)
-    transformed_sliced_fragmented_audio = fragmented_fft_fragmented_audio(audio_as_array, 100)
+    transformed_sliced_fragmented_audio = fragmented_fft_fragmented_audio(audio_as_array, n)
     united_fft = np.array([])
     for fragment in transformed_sliced_fragmented_audio:
         united_fft = np.concatenate((united_fft, fragment), axis=None)
-    print (len(transformed_sliced_fragmented_audio))
-    print (len(transformed_sliced_fragmented_audio))
-    print (len(united_fft))
-    exit()
+    # print(len(transformed_sliced_fragmented_audio[0]))
+    # print(len(transformed_sliced_fragmented_audio[-1]))
+    # print(len(united_fft))
+    # exit()
     plot2(filename, np.asarray(audio_as_array), 'fragmented audio',
-          transformed_fragmented_audio, 'FFT fragmented audio')
-    plot2(filename + ' : zoom in',
-          np.asarray(audio_as_array[audio_length // 10:audio_length - audio_length // 10]),
-          'fragmented audio',
-          transformed_fragmented_audio[audio_length // 10:audio_length - audio_length // 10],
-          'FFT fragmented audio')
-
-
-show_sliced()
-exit()
+          united_fft, 'FFT fragmented audio')
 
 
 def show(filename="audio.wav"):
@@ -127,4 +118,5 @@ def show(filename="audio.wav"):
 
 
 # show(filename="../lab2/audio2.wav")
-show()
+# show()
+show_sliced()
